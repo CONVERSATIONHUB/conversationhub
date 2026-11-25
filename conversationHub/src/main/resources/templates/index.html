@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: page(#{app.name}, ~{::section})}">
+<section class="home-page">
+    <div class="home-hero">
+        <div class="home-hero-copy fade-up">
+            <div class="section-badge" th:text="#{hero.badge}">Trusted appointments, human support</div>
+            <h1 class="home-title">
+                <span th:text="#{hero.title}">Find the right conversation,</span>
+                <span class="home-title-accent" th:text="#{hero.titleAccent}">at the right time.</span>
+            </h1>
+            <p class="home-intro" th:text="#{hero.subtitle}">Book institutional, healthcare, counselling, comforting, mentoring, and pastoral appointments through one warm, simple platform.</p>
+            <div class="home-actions">
+                <a th:href="@{/register}" class="btn-primary rounded-xl px-6 py-3.5 font-bold" th:text="#{hero.cta.primary}">Create an account</a>
+                <a th:href="@{/services}" class="btn-soft rounded-xl px-6 py-3.5 font-bold" th:text="#{hero.cta.secondary}">Explore services</a>
+            </div>
+            <div class="home-proof">
+                <span th:text="#{home.feature1.title}">Verified and transparent</span>
+                <span th:text="#{home.feature2.title}">Simple scheduling</span>
+            </div>
+        </div>
+
+        <!-- Photo by SHVETS production via Pexels: https://www.pexels.com/photo/a-group-of-people-talking-7176137/ -->
+        <div class="hero-visual fade-up-delay" role="img" aria-label="A group counseling conversation">
+            <div class="hero-caption">
+                <strong th:text="#{home.verified}">Verified providers</strong>
+                <span th:text="#{home.hero.caption}">Thoughtful support, close to home.</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="home-categories">
+        <article class="category-item">
+            <span class="category-number">01</span>
+            <h2 th:text="#{home.card.health}">Healthcare</h2>
+            <p th:text="#{home.card.health.desc}">Find clinics, doctors, and diagnostics.</p>
+        </article>
+        <article class="category-item">
+            <span class="category-number">02</span>
+            <h2 th:text="#{home.card.support}">Counselling &amp; comfort</h2>
+            <p th:text="#{home.card.support.desc}">Talk to independent counsellors and mentors.</p>
+        </article>
+        <article class="category-item">
+            <span class="category-number">03</span>
+            <h2 th:text="#{home.card.community}">Institutional &amp; pastoral</h2>
+            <p th:text="#{home.card.community.desc}">Reach leaders, offices, and pastoral care.</p>
+        </article>
+    </div>
+
+    <div class="home-section-heading">
+        <div>
+            <div class="section-badge" th:text="#{home.section.eyebrow}">Our approach</div>
+            <h2 th:text="#{home.section.title}">Make the next step feel simple.</h2>
+        </div>
+        <a th:href="@{/providers}" class="font-bold text-brand hover:underline" th:text="#{nav.providers} + ' →'">Browse providers →</a>
+    </div>
+
+    <div class="feature-grid">
+        <article class="glass feature-card">
+            <span class="feature-index">01</span>
+            <h3 th:text="#{home.feature1.title}">Verified &amp; transparent</h3>
+            <p th:text="#{home.feature1.desc}">Providers are verified, response deadlines are visible, and booking rules are shown before you confirm.</p>
+        </article>
+        <article class="glass feature-card">
+            <span class="feature-index">02</span>
+            <h3 th:text="#{home.feature2.title}">Simple scheduling</h3>
+            <p th:text="#{home.feature2.desc}">See available slots, request an appointment, and track status updates in one clear flow.</p>
+        </article>
+        <article class="glass feature-card">
+            <span class="feature-index">03</span>
+            <h3 th:text="#{home.feature3.title}">Built for care</h3>
+            <p th:text="#{home.feature3.desc}">Designed for sensitive conversations with privacy-aware booking and in-app notifications.</p>
+        </article>
+    </div>
+</section>
+</html>

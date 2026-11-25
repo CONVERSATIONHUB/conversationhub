@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="page(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: #{app.name}">Conversation Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: '#203936',
+                        mist: '#667570',
+                        brand: '#27685e',
+                        brand2: '#1d5149',
+                        accent: '#c9775d',
+                        'accent-soft': '#f0dfd5',
+                        sand: '#f3f0e9',
+                        cream: '#fffefa'
+                    },
+                    boxShadow: {
+                        soft: '0 16px 38px rgba(32,57,54,0.08)',
+                        glow: '0 8px 20px rgba(39,104,94,0.18)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="min-h-screen text-ink antialiased">
+<header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+        <div class="flex items-center justify-between gap-4">
+            <a th:href="@{/}" class="flex items-center gap-3 shrink-0">
+                <span class="brand-mark" aria-hidden="true">C</span>
+                <div class="hidden sm:block">
+                    <div class="font-display text-xl leading-none text-ink" th:text="#{app.name}">Conversation Hub</div>
+                    <div class="text-xs text-ink/55 mt-1" th:text="#{app.tagline}">Connect with care</div>
+                </div>
+            </a>
+
+            <div class="hidden items-center gap-7 lg:flex">
+                <a th:href="@{/}" class="nav-link text-sm font-semibold" th:text="#{nav.home}">Home</a>
+                <a th:href="@{/services}" class="nav-link text-sm font-semibold" th:text="#{nav.services}">Services</a>
+                <a th:href="@{/providers}" class="nav-link text-sm font-semibold" th:text="#{nav.providers}">Providers</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/dashboard}" class="nav-link text-sm font-semibold" th:text="#{nav.dashboard}">Dashboard</a>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center rounded-xl border border-ink/10 bg-white/70 p-1 text-xs font-bold">
+                    <a th:href="@{${currentUri}(lang='en')}" class="rounded-lg px-2.5 py-1.5 transition"
+                       th:classappend="${#locale.language == 'en'} ? ' bg-brand text-white shadow-sm' : ' text-ink/60 hover:text-ink'">EN</a>
+                    <a th:href="@{${currentUri}(lang='sw')}" class="rounded-lg px-2.5 py-1.5 transition"
+                       th:classappend="${#locale.language == 'sw'} ? ' bg-brand text-white shadow-sm' : ' text-ink/60 hover:text-ink'">SW</a>
+                </div>
+
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-soft hidden rounded-xl px-4 py-2.5 text-sm font-semibold md:inline-flex" th:text="#{nav.login}">Log in</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold" th:text="#{nav.getStarted}">Get started</a>
+                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="hidden md:block">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn-soft rounded-xl px-4 py-2.5 text-sm font-semibold" th:text="#{nav.logout}">Logout</button>
+                </form>
+
+                <button id="menuBtn" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-ink/10 bg-white text-ink lg:hidden" aria-label="Menu" aria-controls="mobileMenu" aria-expanded="false">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobileMenu" class="hidden border-t border-ink/10 pt-4 mt-4 lg:hidden">
+            <div class="flex flex-col gap-2">
+                <a th:href="@{/}" class="rounded-xl px-3 py-2 text-sm font-semibold text-ink/75 hover:bg-brand/5" th:text="#{nav.home}">Home</a>
+                <a th:href="@{/services}" class="rounded-xl px-3 py-2 text-sm font-semibold text-ink/75 hover:bg-brand/5" th:text="#{nav.services}">Services</a>
+                <a th:href="@{/providers}" class="rounded-xl px-3 py-2 text-sm font-semibold text-ink/75 hover:bg-brand/5" th:text="#{nav.providers}">Providers</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/dashboard}" class="rounded-xl px-3 py-2 text-sm font-semibold text-ink/75 hover:bg-brand/5" th:text="#{nav.dashboard}">Dashboard</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="rounded-xl px-3 py-2 text-sm font-semibold text-ink/75 hover:bg-brand/5 md:hidden" th:text="#{nav.login}">Log in</a>
+                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="md:hidden px-1 pt-1">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn-soft w-full rounded-xl px-4 py-2.5 text-sm font-semibold" th:text="#{nav.logout}">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="px-4 sm:px-6">
+    <div class="mx-auto max-w-7xl" th:insert="${content}"></div>
+</main>
+
+<footer class="site-footer">
+    <div class="site-footer-inner grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+        <div>
+            <div class="font-display text-lg text-ink" th:text="#{app.name}">Conversation Hub</div>
+            <p class="mt-1 text-sm text-ink/60" th:text="#{footer.copy}">© 2026 Conversation Hub.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+            <span class="rounded-full bg-brand/10 px-3 py-1.5 font-medium text-ink/65" th:text="#{footer.lang}">English / Kiswahili</span>
+            <span class="rounded-full bg-accent/10 px-3 py-1.5 font-medium text-ink/65" th:text="#{footer.notify}">In-app notifications</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const menuButton = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuButton?.addEventListener('click', function () {
+        const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+        menuButton.setAttribute('aria-expanded', String(!isExpanded));
+        mobileMenu?.classList.toggle('hidden');
+    });
+</script>
+</body>
+</html>
