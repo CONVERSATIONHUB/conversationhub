@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByEntityTypeAndEntityId(String entityType, Long entityId);
+
+    List<AuditLog> findTop200ByOrderByPerformedAtDesc();
 }

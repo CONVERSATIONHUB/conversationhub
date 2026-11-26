@@ -50,7 +50,7 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20,
-            columnDefinition = "ENUM('PENDING','CONFIRMED','REJECTED','EXPIRED','CANCELLED','COMPLETED','NO_SHOW')")
+            columnDefinition = "ENUM('PENDING','CONFIRMED','REJECTED','EXPIRED','CANCELLED','WITHDRAWN','COMPLETED','NO_SHOW')")
     private BookingStatus status = BookingStatus.PENDING;
 
     @Column(name = "booking_for_other", nullable = false)
@@ -65,7 +65,7 @@ public class Booking {
     @Column(columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "response_deadline_hours", nullable = false, columnDefinition = "SMALLINT UNSIGNED")
+    @Column(name = "response_deadline_hours", nullable = false)
     private Integer responseDeadlineHours;
 
     @Column(name = "cancellation_rule", nullable = false, length = 500)
@@ -80,8 +80,20 @@ public class Booking {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
+    @Column(name = "capacity_held", nullable = false)
+    private boolean capacityHeld = true;
+
     @Column(name = "decided_at")
     private LocalDateTime decidedAt;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "expired_at")
+    private LocalDateTime expiredAt;
+
+    @Column(name = "withdrawn_at")
+    private LocalDateTime withdrawnAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;

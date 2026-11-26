@@ -15,6 +15,11 @@ public record ManagedProviderView(
         VerificationStatus verificationStatus,
         Integer responseDeadlineHours,
         String cancellationRule,
-        String institutionName
+        String institutionName,
+        boolean published,
+        boolean pendingReverification,
+        String location,
+        Integer minLeadTimeHours,
+        Integer cancellationCutoffHours
 ) {
 }

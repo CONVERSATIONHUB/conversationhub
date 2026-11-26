@@ -11,6 +11,12 @@ public record ProviderView(
         VerificationStatus verificationStatus,
         Integer responseDeadlineHours,
         String cancellationRule,
-        String serviceType
+        String serviceType,
+        String affiliation,
+        String location,
+        String serviceCharge,
+        String mode,
+        Integer availableSlots,
+        boolean hasAvailableSlots
 ) {
 }

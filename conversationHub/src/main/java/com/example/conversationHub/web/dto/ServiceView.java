@@ -7,6 +7,7 @@ public record ServiceView(
         ServiceCategory category,
         String serviceType,
         Integer durationMinutes,
-        String chargeInformation
+        String chargeInformation,
+        boolean active
 ) {
 }

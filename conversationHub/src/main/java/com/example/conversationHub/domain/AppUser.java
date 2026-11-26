@@ -46,9 +46,21 @@ public class AppUser {
     @Column(nullable = false)
     private boolean verified;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @Column(name = "consent_given", nullable = false)
+    private boolean consentGiven;
+
+    @Column(name = "consent_at")
+    private LocalDateTime consentAt;
+
+    @Column(name = "booking_restricted_until")
+    private LocalDateTime bookingRestrictedUntil;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false, length = 30,
-            columnDefinition = "ENUM('SEEKER','APPOINTMENT_OFFICER','CENTER_MANAGER','INSTITUTIONAL_PROVIDER','INDEPENDENT_PROVIDER','MAIN_ADMIN')")
+            columnDefinition = "ENUM('GUEST','SEEKER','APPOINTMENT_OFFICER','CENTER_MANAGER','INSTITUTIONAL_PROVIDER','INDEPENDENT_PROVIDER','MAIN_ADMIN')")
     private AccountType accountType;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -43,6 +43,15 @@ public class Institution {
     @Column(length = 200)
     private String location;
 
+    @Column(name = "contact_phone", length = 30)
+    private String contactPhone;
+
+    @Column(name = "contact_email", length = 150)
+    private String contactEmail;
+
+    @Column(name = "contact_address", length = 255)
+    private String contactAddress;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20,
             columnDefinition = "ENUM('PENDING','APPROVED','SUSPENDED','REJECTED')")

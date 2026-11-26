@@ -22,4 +22,7 @@ public interface AvailabilitySlotRepository extends JpaRepository<AvailabilitySl
 
     List<AvailabilitySlot> findByProviderIdAndStartTimeGreaterThanEqualAndEndTimeLessThanEqual(
             Long providerId, LocalDateTime from, LocalDateTime to);
+
+    boolean existsByProviderIdAndStartTimeAndEndTime(
+            Long providerId, LocalDateTime startTime, LocalDateTime endTime);
 }

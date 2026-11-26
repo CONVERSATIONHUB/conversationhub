@@ -9,10 +9,13 @@ import com.example.conversationHub.web.dto.InstitutionRequest;
 import com.example.conversationHub.web.dto.InstitutionView;
 import com.example.conversationHub.web.dto.RegisterInstitutionRequest;
 import com.example.conversationHub.web.exception.ForbiddenException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -33,13 +36,25 @@ public class InstitutionService {
         this.currentUserService = currentUserService;
     }
 
+    /**
+     * Kept for the existing /api/auth/register/institution route. The route is permitted to
+     * guests by the security configuration, so authorization is enforced here (FR-3.1).
+     */
     public Long registerInstitution(RegisterInstitutionRequest request) {
+        return registerInstitution(request, authenticatedUsername());
+    }
+
+    public Long registerInstitution(RegisterInstitutionRequest request, String username) {
+        AppUser admin = requireAdmin(username);
         InstitutionRequest details = request.institution();
 
         Institution institution = new Institution();
         institution.setName(details.name());
         institution.setType(details.type());
         institution.setLocation(details.location());
+        institution.setContactPhone(details.contactPhone());
+        institution.setContactEmail(details.contactEmail());
+        institution.setContactAddress(details.contactAddress());
         institution.setStatus(InstitutionStatus.PENDING);
         Institution saved = institutionRepository.save(institution);
 
@@ -57,8 +72,37 @@ public class InstitutionService {
 
         saved.setManager(manager);
         institutionRepository.save(saved);
-        auditService.record(null, "INSTITUTION_REGISTERED", "INSTITUTION", saved.getId());
+        auditService.record(admin, "INSTITUTION_REGISTERED", "INSTITUTION", saved.getId());
         return saved.getId();
+    }
+
+    /** FR-2.5: manager-scoped update of the institution account details. */
+    public void updateInstitution(Long institutionId, String username, InstitutionRequest request) {
+        AppUser actor = currentUserService.require(username);
+        Institution institution = institutionRepository.findById(institutionId)
+                .orElseThrow(() -> new IllegalArgumentException("Institution not found"));
+        requireManagerOrAdmin(actor, institution);
+
+        if (request.name() != null) {
+            institution.setName(request.name());
+        }
+        if (request.type() != null) {
+            institution.setType(request.type());
+        }
+        if (request.location() != null) {
+            institution.setLocation(request.location());
+        }
+        if (request.contactPhone() != null) {
+            institution.setContactPhone(request.contactPhone());
+        }
+        if (request.contactEmail() != null) {
+            institution.setContactEmail(request.contactEmail());
+        }
+        if (request.contactAddress() != null) {
+            institution.setContactAddress(request.contactAddress());
+        }
+        institutionRepository.save(institution);
+        auditService.record(actor, "INSTITUTION_UPDATED", "INSTITUTION", institution.getId());
     }
 
     @Transactional(readOnly = true)
@@ -102,12 +146,35 @@ public class InstitutionService {
         auditService.record(admin, action, "INSTITUTION", institution.getId());
     }
 
+    private String authenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            throw new ForbiddenException("Main administrator access is required");
+        }
+        return authentication.getName();
+    }
+
     private AppUser requireAdmin(String username) {
+        if (username == null || username.isBlank()) {
+            throw new ForbiddenException("Main administrator access is required");
+        }
         AppUser user = currentUserService.require(username);
         if (user.getAccountType() != AccountType.MAIN_ADMIN) {
             throw new ForbiddenException("Main administrator access is required");
         }
         return user;
+    }
+
+    private void requireManagerOrAdmin(AppUser actor, Institution institution) {
+        if (actor.getAccountType() == AccountType.MAIN_ADMIN) {
+            return;
+        }
+        if (actor.getAccountType() != AccountType.CENTER_MANAGER
+                || institution.getManager() == null
+                || !Objects.equals(institution.getManager().getId(), actor.getId())) {
+            throw new ForbiddenException("Institution manager access is required");
+        }
     }
 
     private InstitutionView toView(Institution institution) {
@@ -117,7 +184,10 @@ public class InstitutionService {
                 institution.getType(),
                 institution.getLocation(),
                 institution.getStatus(),
-                institution.getManager() == null ? null : institution.getManager().getName()
+                institution.getManager() == null ? null : institution.getManager().getName(),
+                institution.getContactPhone(),
+                institution.getContactEmail(),
+                institution.getContactAddress()
         );
     }
 }

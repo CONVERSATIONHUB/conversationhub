@@ -9,6 +9,9 @@ public record InstitutionView(
         InstitutionType type,
         String location,
         InstitutionStatus status,
-        String managerName
+        String managerName,
+        String contactPhone,
+        String contactEmail,
+        String contactAddress
 ) {
 }

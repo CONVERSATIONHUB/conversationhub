@@ -1,17 +1,22 @@
 package com.example.conversationHub.web.controller;
 
+import com.example.conversationHub.service.InstitutionService;
 import com.example.conversationHub.service.ProviderManagementService;
 import com.example.conversationHub.service.StaffService;
 import com.example.conversationHub.web.dto.ApiResponse;
 import com.example.conversationHub.web.dto.CreateInstitutionalProviderRequest;
 import com.example.conversationHub.web.dto.CreateStaffRequest;
+import com.example.conversationHub.web.dto.InstitutionRequest;
+import com.example.conversationHub.web.dto.ProviderUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,11 +27,22 @@ public class InstitutionController {
 
     private final StaffService staffService;
     private final ProviderManagementService providerManagementService;
+    private final InstitutionService institutionService;
 
     public InstitutionController(StaffService staffService,
-                                 ProviderManagementService providerManagementService) {
+                                 ProviderManagementService providerManagementService,
+                                 InstitutionService institutionService) {
         this.staffService = staffService;
         this.providerManagementService = providerManagementService;
+        this.institutionService = institutionService;
+    }
+
+    @PutMapping("/{institutionId}")
+    public ApiResponse updateInstitution(@PathVariable Long institutionId,
+                                         Authentication authentication,
+                                         @Valid @RequestBody InstitutionRequest request) {
+        institutionService.updateInstitution(institutionId, authentication.getName(), request);
+        return ApiResponse.ok("Institution updated", null);
     }
 
     @PostMapping("/{institutionId}/staff")
@@ -66,6 +82,22 @@ public class InstitutionController {
         return ApiResponse.ok("Staff verification rejected", null);
     }
 
+    @PostMapping("/{institutionId}/staff/{userId}/remove")
+    public ApiResponse removeStaff(@PathVariable Long institutionId,
+                                   @PathVariable Long userId,
+                                   Authentication authentication) {
+        staffService.removeStaff(institutionId, userId, authentication.getName());
+        return ApiResponse.ok("Staff removed", null);
+    }
+
+    @DeleteMapping("/{institutionId}/staff/{userId}")
+    public ApiResponse deleteStaff(@PathVariable Long institutionId,
+                                   @PathVariable Long userId,
+                                   Authentication authentication) {
+        staffService.removeStaff(institutionId, userId, authentication.getName());
+        return ApiResponse.ok("Staff removed", null);
+    }
+
     @PostMapping("/{institutionId}/providers")
     public ResponseEntity<ApiResponse> createProvider(@PathVariable Long institutionId,
                                                       Authentication authentication,
@@ -80,6 +112,16 @@ public class InstitutionController {
     public ApiResponse providers(@PathVariable Long institutionId, Authentication authentication) {
         return ApiResponse.ok("Institution providers retrieved",
                 providerManagementService.listInstitutionProviders(institutionId, authentication.getName()));
+    }
+
+    @PutMapping("/{institutionId}/providers/{providerId}")
+    public ApiResponse updateProvider(@PathVariable Long institutionId,
+                                      @PathVariable Long providerId,
+                                      Authentication authentication,
+                                      @Valid @RequestBody ProviderUpdateRequest request) {
+        providerManagementService.updateInstitutionalProvider(
+                institutionId, providerId, authentication.getName(), request);
+        return ApiResponse.ok("Institutional provider updated", null);
     }
 
     @PostMapping("/{institutionId}/providers/{providerId}/verify")

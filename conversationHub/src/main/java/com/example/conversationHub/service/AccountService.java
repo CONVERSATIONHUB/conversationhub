@@ -20,15 +20,18 @@ public class AccountService {
     private final AppRoleRepository roleRepository;
     private final LanguagePreferenceRepository languagePreferenceRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SystemSettingsService systemSettingsService;
 
     public AccountService(AppUserRepository userRepository,
                           AppRoleRepository roleRepository,
                           LanguagePreferenceRepository languagePreferenceRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          SystemSettingsService systemSettingsService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.languagePreferenceRepository = languagePreferenceRepository;
         this.passwordEncoder = passwordEncoder;
+        this.systemSettingsService = systemSettingsService;
     }
 
     @Transactional
@@ -57,6 +60,8 @@ public class AccountService {
         user.setEmail(email == null || email.isBlank() ? null : email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setVerified(verified);
+        user.setActive(true);
+        user.setConsentGiven(false);
         user.setAccountType(accountType);
         user.setRole(role);
         user.setInstitution(institution);
@@ -65,7 +70,7 @@ public class AccountService {
 
         LanguagePreference preference = new LanguagePreference();
         preference.setUser(saved);
-        preference.setLanguageCode(languageCode == null ? LanguageCode.EN : languageCode);
+        preference.setLanguageCode(languageCode == null ? systemSettingsService.getDefaultLanguage() : languageCode);
         languagePreferenceRepository.save(preference);
 
         return saved;

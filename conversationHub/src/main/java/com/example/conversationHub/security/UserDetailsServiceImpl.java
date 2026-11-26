@@ -37,7 +37,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return User.withUsername(username)
                 .password(user.getPasswordHash())
                 .authorities(AuthorityUtils.createAuthorityList(authority))
-                .disabled(!user.isVerified())
+                .disabled(!user.isVerified() || !user.isActive())
                 .build();
     }
 }

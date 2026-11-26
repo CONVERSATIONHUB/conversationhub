@@ -27,4 +27,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByStatus(BookingStatus status);
 
     List<Booking> findByExpiresAtBeforeAndStatus(LocalDateTime time, BookingStatus status);
+
+    /**
+     * Expiry scan loads and locks all due pending rows in one query so the status
+     * can be re-checked while holding the lock (NFR-3.3).
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select b from Booking b where b.status = :status and b.expiresAt < :now")
+    List<Booking> findExpiringForUpdate(@Param("now") LocalDateTime now,
+                                        @Param("status") BookingStatus status);
 }

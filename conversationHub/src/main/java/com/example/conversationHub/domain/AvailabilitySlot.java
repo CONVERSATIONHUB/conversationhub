@@ -37,10 +37,10 @@ public class AvailabilitySlot {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT UNSIGNED")
+    @Column(nullable = false)
     private Integer capacity = 1;
 
-    @Column(name = "booked_count", nullable = false, columnDefinition = "SMALLINT UNSIGNED")
+    @Column(name = "booked_count", nullable = false)
     private Integer bookedCount = 0;
 
     @Column(nullable = false)

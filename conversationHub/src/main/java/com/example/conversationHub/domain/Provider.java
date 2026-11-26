@@ -61,14 +61,72 @@ public class Provider {
             columnDefinition = "ENUM('UNVERIFIED','PENDING','VERIFIED','REJECTED')")
     private VerificationStatus verificationStatus = VerificationStatus.UNVERIFIED;
 
-    @Column(name = "response_deadline_hours", nullable = false, columnDefinition = "SMALLINT UNSIGNED")
+    /**
+     * Only published, verified and active providers of approved institutions are visible publicly.
+     * A provider is published when its verification (or re-verification) succeeds.
+     */
+    @Column(nullable = false)
+    private boolean published = false;
+
+    @Column(length = 200)
+    private String location;
+
+    @Column(name = "identity_details", length = 2000)
+    private String identityDetails;
+
+    @Column(length = 2000)
+    private String qualifications;
+
+    @Column(name = "response_deadline_hours", nullable = false)
     private Integer responseDeadlineHours = 48;
 
     @Column(name = "cancellation_rule", nullable = false, length = 500)
     private String cancellationRule = "Cancellation allowed before the appointment.";
 
+    @Column(name = "min_lead_time_hours", nullable = false)
+    private Integer minLeadTimeHours = 0;
+
+    @Column(name = "cancellation_cutoff_hours", nullable = false)
+    private Integer cancellationCutoffHours = 24;
+
+    @Column(name = "no_show_rule", nullable = false, length = 500)
+    private String noShowRule = "A no-show may lead to a temporary booking restriction.";
+
+    @Column(name = "no_show_restriction_hours", nullable = false)
+    private Integer noShowRestrictionHours = 24;
+
     @Column(nullable = false)
     private boolean active = true;
+
+    /*
+     * FR-4.7: changes to verified fields are held here until re-verification succeeds.
+     * The live fields above continue to represent the published snapshot in the meantime.
+     */
+    @Column(name = "pending_reverification", nullable = false)
+    private boolean pendingReverification = false;
+
+    @Column(name = "pending_name", length = 150)
+    private String pendingName;
+
+    @Column(name = "pending_specialisation", length = 200)
+    private String pendingSpecialisation;
+
+    @Column(name = "pending_identity_details", length = 2000)
+    private String pendingIdentityDetails;
+
+    @Column(name = "pending_qualifications", length = 2000)
+    private String pendingQualifications;
+
+    @Column(name = "pending_location", length = 200)
+    private String pendingLocation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pending_service_mode", length = 20)
+    private ServiceMode pendingServiceMode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pending_service_id")
+    private ServiceEntity pendingService;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

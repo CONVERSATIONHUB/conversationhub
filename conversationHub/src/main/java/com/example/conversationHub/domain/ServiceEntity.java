@@ -35,7 +35,7 @@ public class ServiceEntity {
     @Column(name = "service_type", nullable = false, length = 100)
     private String serviceType;
 
-    @Column(name = "duration_minutes", nullable = false, columnDefinition = "SMALLINT UNSIGNED")
+    @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes = 30;
 
     @Column(name = "charge_information", length = 255)

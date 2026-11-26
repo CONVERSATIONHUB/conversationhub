@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 @Configuration
 public class AdminBootstrap {
@@ -17,6 +18,7 @@ public class AdminBootstrap {
     private static final Logger log = LoggerFactory.getLogger(AdminBootstrap.class);
 
     @Bean
+    @Order(1)
     CommandLineRunner bootstrapAdmin(AppUserRepository userRepository,
                                      AccountService accountService,
                                      @Value("${app.admin.bootstrap.enabled:true}") boolean enabled,

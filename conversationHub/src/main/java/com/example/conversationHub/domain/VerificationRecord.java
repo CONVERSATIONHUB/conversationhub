@@ -38,8 +38,18 @@ public class VerificationRecord {
     @JoinColumn(name = "institution_id")
     private Institution institution;
 
-    @Column(name = "credential_reference", length = 200)
+    @Column(name = "credential_reference", length = 500)
     private String credentialReference;
+
+    @Column(name = "identity_details", length = 2000)
+    private String identityDetails;
+
+    @Column(length = 2000)
+    private String qualifications;
+
+    /** Text-only reference to an uploaded document; no file storage is performed. */
+    @Column(name = "document_reference", length = 500)
+    private String documentReference;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20,

@@ -1,19 +1,20 @@
 package com.example.conversationHub.web.dto;
 
 import com.example.conversationHub.domain.enums.LanguageCode;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record RegisterSeekerRequest(
 
-        @NotBlank(message = "Name is required")
+        @NotBlank(message = "{validation.name.required}")
         @Size(max = 150, message = "Name must not exceed 150 characters")
         String name,
 
-        @NotBlank(message = "Phone number is required")
+        @NotBlank(message = "{validation.phone.required}")
         @Pattern(regexp = "^[0-9+()\\-\\s]{7,30}$", message = "Phone number format is invalid")
         String phone,
 
@@ -21,11 +22,19 @@ public record RegisterSeekerRequest(
         @Size(max = 150, message = "Email must not exceed 150 characters")
         String email,
 
-        @NotBlank(message = "Password is required")
+        @NotBlank(message = "{validation.password.required}")
         @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
         String password,
 
-        @NotNull(message = "Language is required")
-        LanguageCode languageCode
+        LanguageCode languageCode,
+
+        @AssertTrue(message = "{validation.consent.required}")
+        @JsonAlias("consent")
+        boolean consentGiven
 ) {
+    /** Backwards-compatible constructor for callers that do not supply consent explicitly. */
+    public RegisterSeekerRequest(String name, String phone, String email, String password,
+                                 LanguageCode languageCode) {
+        this(name, phone, email, password, languageCode, false);
+    }
 }

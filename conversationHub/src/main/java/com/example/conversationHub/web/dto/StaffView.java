@@ -8,6 +8,7 @@ public record StaffView(
         String phone,
         String email,
         AccountType accountType,
-        boolean verified
+        boolean verified,
+        boolean active
 ) {
 }

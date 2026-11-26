@@ -10,5 +10,9 @@ import java.util.Optional;
 public interface ServiceRepository extends JpaRepository<ServiceEntity, Long> {
     List<ServiceEntity> findByCategory(ServiceCategory category);
 
+    List<ServiceEntity> findByActiveTrue();
+
+    List<ServiceEntity> findByCategoryAndActiveTrue(ServiceCategory category);
+
     Optional<ServiceEntity> findByCategoryAndServiceType(ServiceCategory category, String serviceType);
 }

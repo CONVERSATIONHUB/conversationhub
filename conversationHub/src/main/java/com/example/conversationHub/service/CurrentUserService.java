@@ -2,6 +2,7 @@ package com.example.conversationHub.service;
 
 import com.example.conversationHub.domain.AppUser;
 import com.example.conversationHub.repository.AppUserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,5 +20,13 @@ public class CurrentUserService {
         return userRepository.findByPhone(username)
                 .or(() -> userRepository.findByEmail(username))
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+    }
+
+    @Transactional(readOnly = true)
+    public AppUser require(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new IllegalArgumentException("Authentication is required");
+        }
+        return require(authentication.getName());
     }
 }

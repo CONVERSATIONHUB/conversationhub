@@ -18,7 +18,11 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
     List<Provider> findByInstitution_IdAndVerificationStatus(
             Long institutionId, VerificationStatus status);
 
+    List<Provider> findByInstitutionIsNull();
+
     List<Provider> findByInstitutionIsNullAndVerificationStatus(VerificationStatus status);
+
+    List<Provider> findByPublishedTrueAndActiveTrueAndVerificationStatus(VerificationStatus status);
 
     List<Provider> findByService_Category(ServiceCategory category);
 }

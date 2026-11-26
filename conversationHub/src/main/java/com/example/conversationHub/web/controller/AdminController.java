@@ -86,12 +86,14 @@ public class AdminController {
     }
 
     @GetMapping("/bookings")
-    public ApiResponse bookings() {
-        return ApiResponse.ok("Bookings retrieved", adminQueryService.allBookings());
+    public ApiResponse bookings(Authentication authentication) {
+        return ApiResponse.ok("Bookings retrieved",
+                adminQueryService.allBookings(authentication.getName()));
     }
 
     @GetMapping("/audit-logs")
-    public ApiResponse auditLogs() {
-        return ApiResponse.ok("Audit logs retrieved", adminQueryService.recentAuditLogs());
+    public ApiResponse auditLogs(Authentication authentication) {
+        return ApiResponse.ok("Audit logs retrieved",
+                adminQueryService.recentAuditLogs(authentication.getName()));
     }
 }

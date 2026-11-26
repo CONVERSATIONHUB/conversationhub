@@ -1,7 +1,6 @@
 package com.example.conversationHub.service;
 
 import com.example.conversationHub.domain.AppUser;
-import com.example.conversationHub.domain.Institution;
 import com.example.conversationHub.domain.VerificationRecord;
 import com.example.conversationHub.domain.enums.AccountType;
 import com.example.conversationHub.domain.enums.InstitutionStatus;
@@ -46,6 +45,10 @@ public class StaffService {
                 && request.accountType() != AccountType.CENTER_MANAGER) {
             throw new IllegalArgumentException("Only institution staff accounts can be created here");
         }
+        // BR / FR-3.5: an approved institution has exactly one center manager.
+        if (request.accountType() == AccountType.CENTER_MANAGER && hasCenterManager(institutionId)) {
+            throw new IllegalStateException("Institution already has a center manager");
+        }
 
         AppUser staff = accountService.createUser(
                 request.name(),
@@ -66,6 +69,7 @@ public class StaffService {
         verificationRecordRepository.save(record);
 
         auditService.record(manager, "STAFF_CREATED", "APP_USER", staff.getId());
+        auditService.record(manager, "ROLE_ASSIGNED", "APP_USER", staff.getId());
         return staff.getId();
     }
 
@@ -86,6 +90,27 @@ public class StaffService {
                 .filter(staff -> !staff.isVerified())
                 .map(this::toView)
                 .toList();
+    }
+
+    /** FR-3.6: manager-scoped removal; the account is deactivated, never deleted. */
+    public void removeStaff(Long institutionId, Long staffUserId, String username) {
+        AppUser manager = requireCenterManager(username, institutionId);
+        AppUser staff = userRepository.findById(staffUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Staff account not found"));
+        if (!isStaff(staff) || staff.getInstitution() == null
+                || !Objects.equals(staff.getInstitution().getId(), institutionId)) {
+            throw new IllegalArgumentException("Staff account does not belong to this institution");
+        }
+        if (staff.getAccountType() == AccountType.CENTER_MANAGER) {
+            throw new IllegalArgumentException("A center manager cannot be removed as staff");
+        }
+        if (Objects.equals(staff.getId(), manager.getId())) {
+            throw new IllegalArgumentException("A manager cannot remove their own account");
+        }
+
+        staff.setActive(false);
+        userRepository.save(staff);
+        auditService.record(manager, "STAFF_REMOVED", "APP_USER", staff.getId());
     }
 
     public void verify(Long institutionId, Long staffUserId, String username) {
@@ -121,9 +146,20 @@ public class StaffService {
         verificationRecordRepository.save(record);
 
         auditService.record(manager, action, "APP_USER", staff.getId());
+        if (approved) {
+            auditService.record(manager, "ROLE_ASSIGNED", "APP_USER", staff.getId());
+        }
+    }
+
+    private boolean hasCenterManager(Long institutionId) {
+        return userRepository.findByInstitution_Id(institutionId).stream()
+                .anyMatch(user -> user.getAccountType() == AccountType.CENTER_MANAGER);
     }
 
     private AppUser requireCenterManager(String username, Long institutionId) {
+        if (username == null || username.isBlank()) {
+            throw new ForbiddenException("Center manager access is required");
+        }
         AppUser user = currentUserService.require(username);
         if (user.getAccountType() != AccountType.CENTER_MANAGER) {
             throw new ForbiddenException("Center manager access is required");
@@ -150,7 +186,8 @@ public class StaffService {
                 user.getPhone(),
                 user.getEmail(),
                 user.getAccountType(),
-                user.isVerified()
+                user.isVerified(),
+                user.isActive()
         );
     }
 }

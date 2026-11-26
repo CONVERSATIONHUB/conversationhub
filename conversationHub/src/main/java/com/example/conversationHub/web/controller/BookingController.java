@@ -74,6 +74,12 @@ public class BookingController {
         return ApiResponse.ok("Booking rejected", null);
     }
 
+    @PostMapping("/{bookingId}/withdraw")
+    public ApiResponse withdraw(@PathVariable Long bookingId, Authentication authentication) {
+        bookingService.withdraw(bookingId, authentication.getName());
+        return ApiResponse.ok("Booking request withdrawn", null);
+    }
+
     @PostMapping("/{bookingId}/cancel")
     public ApiResponse cancel(@PathVariable Long bookingId,
                               Authentication authentication,

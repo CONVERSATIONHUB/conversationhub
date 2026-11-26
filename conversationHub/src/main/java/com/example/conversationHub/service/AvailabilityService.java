@@ -38,7 +38,7 @@ public class AvailabilityService {
     public Long createSlot(Long providerId, String username, SlotRequest request) {
         AppUser actor = currentUserService.require(username);
         Provider provider = requireManagedProvider(actor, providerId);
-        validateSlotRequest(request, null);
+        validateSlotRequest(request);
 
         AvailabilitySlot slot = new AvailabilitySlot();
         apply(slot, request);
@@ -53,8 +53,8 @@ public class AvailabilityService {
     public void updateSlot(Long providerId, Long slotId, String username, SlotRequest request) {
         AppUser actor = currentUserService.require(username);
         Provider provider = requireManagedProvider(actor, providerId);
-        AvailabilitySlot slot = requireSlot(provider, slotId);
-        validateSlotRequest(request, slot);
+        AvailabilitySlot slot = requireSlotForUpdate(provider, slotId);
+        validateSlotRequest(request);
 
         if (request.capacity() < slot.getBookedCount()) {
             throw new IllegalArgumentException("Capacity cannot be less than booked count");
@@ -68,7 +68,7 @@ public class AvailabilityService {
     public void setBlocked(Long providerId, Long slotId, String username, boolean blocked) {
         AppUser actor = currentUserService.require(username);
         Provider provider = requireManagedProvider(actor, providerId);
-        AvailabilitySlot slot = requireSlot(provider, slotId);
+        AvailabilitySlot slot = requireSlotForUpdate(provider, slotId);
         slot.setBlocked(blocked);
         slotRepository.save(slot);
         auditService.record(actor, blocked ? "SLOT_BLOCKED" : "SLOT_UNBLOCKED",
@@ -86,12 +86,13 @@ public class AvailabilityService {
                 .toList();
     }
 
-    private void validateSlotRequest(SlotRequest request, AvailabilitySlot existing) {
+    private void validateSlotRequest(SlotRequest request) {
         if (request.endTime() == null || request.startTime() == null
                 || !request.endTime().isAfter(request.startTime())) {
             throw new IllegalArgumentException("End time must be after start time");
         }
-        if (existing == null && !request.startTime().isAfter(LocalDateTime.now())) {
+        // A slot may never be moved into the past, whether created or updated (NFR-3.3).
+        if (!request.startTime().isAfter(LocalDateTime.now())) {
             throw new IllegalArgumentException("Slot start time must be in the future");
         }
     }
@@ -103,8 +104,8 @@ public class AvailabilityService {
         slot.setBlocked(Boolean.TRUE.equals(request.blocked()));
     }
 
-    private AvailabilitySlot requireSlot(Provider provider, Long slotId) {
-        AvailabilitySlot slot = slotRepository.findById(slotId)
+    private AvailabilitySlot requireSlotForUpdate(Provider provider, Long slotId) {
+        AvailabilitySlot slot = slotRepository.findByIdForUpdate(slotId)
                 .orElseThrow(() -> new IllegalArgumentException("Slot not found"));
         if (!Objects.equals(slot.getProvider().getId(), provider.getId())) {
             throw new IllegalArgumentException("Slot does not belong to provider");
@@ -112,7 +113,8 @@ public class AvailabilityService {
         return slot;
     }
 
-    private Provider requireManagedProvider(AppUser actor, Long providerId) {
+    /** Shared provider-authorisation rule for slots and weekly recurrence rules. */
+    public Provider requireManagedProvider(AppUser actor, Long providerId) {
         Provider provider = providerRepository.findById(providerId)
                 .orElseThrow(() -> new IllegalArgumentException("Provider not found"));
 

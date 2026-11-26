@@ -44,6 +44,30 @@ public record CreateInstitutionalProviderRequest(
 
         @NotBlank(message = "Cancellation rule is required")
         @Size(max = 500, message = "Cancellation rule must not exceed 500 characters")
-        String cancellationRule
+        String cancellationRule,
+
+        @Size(max = 200, message = "Location must not exceed 200 characters")
+        String location,
+
+        @Size(max = 2000, message = "Identity details must not exceed 2000 characters")
+        String identityDetails,
+
+        @Size(max = 2000, message = "Qualifications must not exceed 2000 characters")
+        String qualifications,
+
+        @Size(max = 500, message = "Document reference must not exceed 500 characters")
+        String documentReference,
+
+        @Min(value = 0, message = "Minimum lead time cannot be negative")
+        Integer minLeadTimeHours,
+
+        @Min(value = 0, message = "Cancellation cutoff cannot be negative")
+        Integer cancellationCutoffHours,
+
+        @Size(max = 500, message = "No-show rule must not exceed 500 characters")
+        String noShowRule,
+
+        @Min(value = 0, message = "No-show restriction cannot be negative")
+        Integer noShowRestrictionHours
 ) {
 }
